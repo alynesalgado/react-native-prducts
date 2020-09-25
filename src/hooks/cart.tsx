@@ -30,23 +30,89 @@ const CartProvider: React.FC = ({ children }) => {
 
   useEffect(() => {
     async function loadProducts(): Promise<void> {
-      // TODO LOAD ITEMS FROM ASYNC STORAGE
+      const productsCart = await AsyncStorage.getItem(
+        '@GoMarketplace:products',
+      );
+
+      if (productsCart) {
+        setProducts(JSON.parse(productsCart));
+      }
     }
 
     loadProducts();
   }, []);
 
-  const addToCart = useCallback(async product => {
-    // TODO ADD A NEW ITEM TO THE CART
-  }, []);
+  const addToCart = useCallback(
+    async (product: Product) => {
+      const cartCopy = [...products];
 
-  const increment = useCallback(async id => {
-    // TODO INCREMENTS A PRODUCT QUANTITY IN THE CART
-  }, []);
+      const productAlreadyExists = cartCopy.find(
+        productItem => productItem.id === product.id,
+      );
 
-  const decrement = useCallback(async id => {
-    // TODO DECREMENTS A PRODUCT QUANTITY IN THE CART
-  }, []);
+      if (productAlreadyExists) {
+        productAlreadyExists.quantity += 1;
+      } else {
+        cartCopy.push({ ...product, quantity: 1 });
+      }
+
+      setProducts(cartCopy);
+
+      await AsyncStorage.setItem(
+        '@GoMarketplace:products',
+        JSON.stringify(cartCopy),
+      );
+    },
+    [products],
+  );
+
+  const increment = useCallback(
+    async id => {
+      const cartCopy = [...products];
+
+      const productAlreadyExists = cartCopy.find(
+        productItem => productItem.id === id,
+      );
+
+      if (productAlreadyExists) {
+        productAlreadyExists.quantity += 1;
+      } else {
+        cartCopy;
+      }
+
+      setProducts(cartCopy);
+
+      await AsyncStorage.setItem(
+        '@GoMarketplace:products',
+        JSON.stringify(cartCopy),
+      );
+    },
+    [products],
+  );
+
+  const decrement = useCallback(
+    async id => {
+      const cartCopy = [...products];
+
+      const productAlreadyExists = cartCopy.find(
+        productItem => productItem.id === id,
+      );
+
+      if (productAlreadyExists) {
+        productAlreadyExists.quantity -= 1;
+      } else {
+        cartCopy;
+      }
+
+      setProducts(cartCopy);
+
+      await AsyncStorage.setItem(
+        '@GoMarketplace:products',
+        JSON.stringify(cartCopy),
+      );
+    },
+    [products],
+  );
 
   const value = React.useMemo(
     () => ({ addToCart, increment, decrement, products }),
